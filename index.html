@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- <script src="http://www.jq22.com/jquery/jquery-2.1.1.js"></script> -->
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/echarts.js"></script>
+    <script src="./js/china.js"></script>
+    <script src="http://mockjs.com/dist/mock.js"></script>
+    <script src="./js/mockData.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .title {
+            width: 280px;
+            height: 120px;
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            border: 1px solid red;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main" style="width: 100%;height:100%;"></div>
+    <div class="title">
+        <p>总金额：1000</p>
+    </div>
+</body>
+<script>
+    var myChart = echarts.init(document.getElementById('main'));
+    var geoCoordMap = {
+        '北京': [116.322056, 39.89491],
+        '天津': [117.201538, 39.085294],
+        '上海': [121.473658, 31.230378],
+        '重庆': [107.7539, 30.1904],
+        '河北': [114.502461, 38.045474],
+        '河南': [113.665412, 34.757975],
+        '云南': [102.712251, 25.040609],
+        '辽宁': [123.398864, 41.772692],
+        '黑龙江': [126.533401, 45.808475],
+        '湖南': [112.934412, 28.236465],
+        '安徽': [117.228779, 31.826871],
+        '山东': [117.128052, 36.654708],
+        '新疆': [87.609903, 43.824841],
+        '江苏': [118.807497, 32.073386],
+        '浙江': [120.188858, 30.258323],
+        '江西': [115.863679, 28.695632],
+        '湖北': [114.299, 30.599109],
+        '广西': [108.34717, 22.818337],
+        '甘肃': [103.834775, 36.064766],
+        '山西': [112.545804, 37.872767],
+        '内蒙古': [111.746735, 40.846955],
+        '陕西': [108.947741, 34.340931],
+        '吉林': [126.553909, 43.837532],
+        '福建': [119.315669, 26.085315],
+        '贵州': [106.643183, 26.649244],
+        '广东': [113.267827, 23.132898],
+        '青海': [101.780709, 36.621365],
+        '西藏': [91.116295, 29.648123],
+        '四川': [104.077487, 30.649898],
+        '宁夏': [106.237436, 38.488402],
+        '海南': [110.334841, 20.033681],
+        '台湾': [120.794953, 23.755822],
+        '香港': [114.169694, 22.277076],
+        '澳门': [113.492493, 22.082756]
+    };
+
+    var convertData = function (data) {
+        var res = [];
+        for (var i = 0; i < data.length; i++) {
+            var geoCoord = geoCoordMap[data[i].name];
+            if (geoCoord) {
+                res.push({
+                    name: data[i].name,
+                    value: data[i].value,
+                    coord: geoCoord
+                });
+            }
+        }
+        return res;
+    };
+    function drawMap() {
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:1111/t',
+            data: {
+
+            },
+            success: function (res) {
+                var data = JSON.parse(res)
+
+
+                var markData = data.markPoint;
+                for (var i = 0; i < markData.length; i++) {
+                    markData[i].coord = JSON.parse(markData[i].coord)
+                }
+                myChart.setOption({
+                    title: {
+                        show: true,
+                        text: '金融销量',
+                        left: 'center'
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            saveAsImage: {
+                                show: true
+                            }
+                        }
+                    },
+                    // tooltip: {
+                    //     trigger: 'item'
+                    // },
+                    // legend: {
+                    //     type: 'plain',
+                    //     left: 'left',
+                    //     orient: 'vertical',
+                    //     data: [
+                    //         {
+                    //             name: '产品1'
+                    //         },
+                    //         {
+                    //             name: '产品2'
+                    //         }
+                    //     ]
+                    // },
+                    visualMap: {
+                        min: 0,
+                        max: 2500,
+                        left: 'left',
+                        top: 'bottom',
+                        text: ['高', '低'],           // 文本，默认为数值文本
+                        calculable: true,
+                        color: ['#00008B', '#ADD8E6']
+                    },
+                    series: [
+                        {
+                            type: 'map',
+                            name: '产品1',
+                            mapType: 'china',
+                            // roam:true,
+                            label: {
+                                normal: {
+                                    show: true// 正常显示时，显示省份名称
+                                },
+                                emphasis: {
+                                    show: true // 鼠标滑动上去时，显示省份名称
+                                }
+                            },
+                            data: [ // 各省份对应的 销量
+                                { name: '北京', value: Math.round(Math.random() * 1000) },
+                                { name: '天津', value: Math.round(Math.random() * 1000) },
+                                { name: '上海', value: Math.round(Math.random() * 1000) },
+                                { name: '重庆', value: Math.round(Math.random() * 1000) },
+                                { name: '河北', value: Math.round(Math.random() * 1000) },
+                                { name: '河南', value: Math.round(Math.random() * 1000) },
+                                { name: '云南', value: Math.round(Math.random() * 1000) },
+                                { name: '辽宁', value: Math.round(Math.random() * 1000) },
+                                { name: '黑龙江', value: Math.round(Math.random() * 1000) },
+                                { name: '湖南', value: Math.round(Math.random() * 1000) },
+                                { name: '安徽', value: Math.round(Math.random() * 1000) },
+                                { name: '山东', value: Math.round(Math.random() * 1000) },
+                                { name: '新疆', value: Math.round(Math.random() * 1000) },
+                                { name: '江苏', value: Math.round(Math.random() * 1000) },
+                                { name: '浙江', value: Math.round(Math.random() * 1000) },
+                                { name: '江西', value: Math.round(Math.random() * 1000) },
+                                { name: '湖北', value: Math.round(Math.random() * 1000) },
+                                { name: '广西', value: Math.round(Math.random() * 1000) },
+                                { name: '甘肃', value: Math.round(Math.random() * 1000) },
+                                { name: '山西', value: Math.round(Math.random() * 1000) },
+                                { name: '内蒙古', value: Math.round(Math.random() * 1000) },
+                                { name: '陕西', value: Math.round(Math.random() * 1000) },
+                                { name: '吉林', value: Math.round(Math.random() * 1000) },
+                                { name: '福建', value: Math.round(Math.random() * 1000) },
+                                { name: '贵州', value: Math.round(Math.random() * 1000) },
+                                { name: '广东', value: Math.round(Math.random() * 1000) },
+                                { name: '青海', value: Math.round(Math.random() * 1000) },
+                                { name: '西藏', value: Math.round(Math.random() * 1000) },
+                                { name: '四川', value: Math.round(Math.random() * 1000) },
+                                { name: '宁夏', value: Math.round(Math.random() * 1000) },
+                                { name: '海南', value: Math.round(Math.random() * 1000) },
+                                { name: '台湾', value: Math.round(Math.random() * 1000) },
+                                { name: '香港', value: Math.round(Math.random() * 1000) },
+                                { name: '澳门', value: Math.round(Math.random() * 1000) }
+                            ],
+                            markPoint: {
+                                symbol: 'circle',
+                                symbolSize: 10,
+                                // efffect:{
+                                //     show:true,
+                                //     shadowBlur:0
+                                // },
+                                itemStyle: {
+                                    normal: {
+                                        color: 'red' // 标注图标的颜色
+                                    }
+                                },
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    color: '#ffffff', // 标注字体的颜色
+                                    fontSize: '20'
+                                },
+                                // data: data.markPoint
+                                data: convertData([
+                                    { name: '北京', value: parseInt(Math.random() * 1000) },
+                                    { name: '浙江', }
+                                ])
+                            }
+                        }
+                    ]
+                })
+            }
+        })
+        // setTimeout(drawMap,1000)
+    }
+    drawMap();
+</script>
+
+</html>
